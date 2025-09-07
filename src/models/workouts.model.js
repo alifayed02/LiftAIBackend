@@ -81,5 +81,3 @@ export async function deleteWorkout(id) {
   if (error) throw error;
   return data;
 }
-
-

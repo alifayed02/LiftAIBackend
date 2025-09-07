@@ -9,7 +9,6 @@ export const getUserById = asyncHandler(async (req, res) => {
 
 export const getUserByEmail = asyncHandler(async (req, res) => {
     const email = req.params.email;
-    console.log(email);
     const user = await usersService.getByEmail(email);
     res.json(user);
 });

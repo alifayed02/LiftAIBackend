@@ -1,5 +1,6 @@
 import { asyncHandler } from '../middlewares/async.js';
 import * as workoutsService from '../services/workouts.service.js';
+import * as gemini from '../helpers/gemini.js';
 
 export const getWorkoutById = asyncHandler(async (req, res) => {
     const id = req.params.id;
@@ -16,7 +17,22 @@ export const listWorkoutsByUser = asyncHandler(async (req, res) => {
 });
 
 export const createWorkout = asyncHandler(async (req, res) => {
-    const workout = await workoutsService.create(req.body);
+    const videoPath = req.body.videoPath;
+    const userId = req.body.userId;
+    const metadata = req.body.metadata;
+
+    const width = metadata.width;
+    const height = metadata.height;
+
+    const analysis = await gemini.geminiAnalysis(videoPath);
+    const analyzedWorkout = await gemini.overlayAnalysis(videoPath, analysis, width, height);
+
+    const title = analysis.exercise;
+    const notes = "";
+    const videoUrl = analyzedWorkout;
+    const recordedAt = new Date();
+
+    const workout = await workoutsService.create({ userId, title, notes, videoUrl, recordedAt });
     res.json(workout);
 });
 

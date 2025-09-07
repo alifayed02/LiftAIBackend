@@ -13,7 +13,6 @@ export async function getById(workoutId) {
 export async function listByUser(userId, options = {}) {
   const { limit = 100, offset = 0 } = options;
   const workouts = await WorkoutsModel.listWorkoutsByUser(userId, { limit, offset });
-  console.log(workouts);
   return workouts;
 }
 
@@ -45,11 +44,4 @@ export async function remove(workoutId) {
     throw err;
   }
   return deleted;
-}
-
-export async function analyze() {
-  // upload video and prompt to gemini
-  // get response from gemini
-  // create workout
-  
 }

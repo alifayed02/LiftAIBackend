@@ -1,6 +1,8 @@
 import { asyncHandler } from '../middlewares/async.js';
 import * as workoutsService from '../services/workouts.service.js';
 import * as gemini from '../helpers/gemini.js';
+import * as usersService from '../services/users.service.js';
+import * as subscriptionsService from '../services/subscriptions.service.js';
 
 export const getWorkoutById = asyncHandler(async (req, res) => {
     const id = req.params.id;
@@ -20,6 +22,25 @@ export const createWorkout = asyncHandler(async (req, res) => {
     const videoPath = req.body.videoPath;
     const userId = req.body.userId;
     const metadata = req.body.metadata;
+
+    // Enforce subscription/plan limits before running analysis
+    if (!userId) {
+        const err = new Error('userId is required');
+        err.status = 400;
+        throw err;
+    }
+    const user = await usersService.getById(userId);
+    const userSubscriptions = await subscriptionsService.listByUser(userId, { limit: 100, offset: 0 });
+    const activeSubscription = userSubscriptions.find(s => s.status === 'active');
+    const currentSubscription = activeSubscription || userSubscriptions[0] || null;
+    if (currentSubscription && currentSubscription.plan_id === 'free') {
+        const currentVideosCount = (user && typeof user.videos === 'number') ? user.videos : 0;
+        if (currentVideosCount >= 5) {
+            const err = new Error('Free plan limit reached: maximum of 5 videos');
+            err.status = 403;
+            throw err;
+        }
+    }
 
     const width = metadata.width;
     const height = metadata.height;

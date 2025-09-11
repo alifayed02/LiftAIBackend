@@ -2,11 +2,12 @@ import { supabase } from "./db.js";
 
 export const TABLE = "users";
 
-export async function createUser({ id = null, email }) {
+export async function createUser({ id = null, email, videos }) {
   const payload = {
     email,
   };
   if (id) payload.id = id;
+  if (videos !== undefined) payload.videos = videos ?? 0;
 
   const { data, error } = await supabase
     .from(TABLE)
@@ -54,9 +55,10 @@ export async function listUsers({ limit = 100, offset = 0 } = {}) {
   return data;
 }
 
-export async function updateUser(id, { email } = {}) {
+export async function updateUser(id, { email, videos } = {}) {
   const updates = {};
   if (email !== undefined) updates.email = email;
+  if (videos !== undefined) updates.videos = videos ?? 0;
 
   if (Object.keys(updates).length === 0) {
     return getUserById(id);

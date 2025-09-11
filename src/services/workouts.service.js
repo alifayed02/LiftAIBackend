@@ -1,4 +1,5 @@
 import * as WorkoutsModel from '../models/workouts.model.js';
+import * as UsersModel from '../models/users.model.js';
 
 export async function getById(workoutId) {
   const workout = await WorkoutsModel.getWorkoutById(workoutId);
@@ -17,11 +18,30 @@ export async function listByUser(userId, options = {}) {
 }
 
 export async function create(workout) {
+  // Basic input validation (controller does plan checks early)
+  const userIdFromPayload = workout && workout.userId;
+  if (!userIdFromPayload) {
+    const err = new Error('userId is required');
+    err.status = 400;
+    throw err;
+  }
+
   const newWorkout = await WorkoutsModel.createWorkout(workout);
   if (!newWorkout) {
     const err = new Error('Failed to create workout');
     err.status = 500;
     throw err;
+  }
+  // Increment the user's videos count; ignore failures to not block workout creation
+  try {
+    const userId = newWorkout.user_id;
+    if (userId) {
+      const user = await UsersModel.getUserById(userId);
+      const currentVideos = (user && typeof user.videos === 'number') ? user.videos : 0;
+      await UsersModel.updateUser(userId, { videos: currentVideos + 1 });
+    }
+  } catch (_) {
+    // Intentionally ignore update failures
   }
   return newWorkout;
 }

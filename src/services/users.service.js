@@ -1,4 +1,5 @@
 import * as UsersModel from '../models/users.model.js';
+import * as SubscriptionsService from './subscriptions.service.js';
 
 export async function getById(userId) {
   const user = await UsersModel.getUserById(userId);
@@ -26,6 +27,15 @@ export async function create(user) {
         const err = new Error('Failed to create user');
         err.status = 500;
         throw err;
+    }
+    try {
+        await SubscriptionsService.create({
+            userId: newUser.id,
+            planId: 'free',
+            status: 'active',
+        });
+    } catch (_) {
+        // Intentionally ignore subscription creation failures to not block user creation
     }
     return newUser;
 }

@@ -83,6 +83,9 @@ export async function syncFromRevenueCat(userId) {
 
   // Ensure plan exists (if any). If no productId, fallback to 'free'
   const planId = productId || 'free';
+
+  console.log(planId, status, current_period_start, current_period_end, cancel_at_period_end);
+
   if (planId) {
     try {
       // Try to create; if it exists, we'll ignore the unique violation
@@ -91,8 +94,6 @@ export async function syncFromRevenueCat(userId) {
       // ignore errors (e.g., already exists)
     }
   }
-
-  console.log(planId, status, current_period_start, current_period_end, cancel_at_period_end);
 
   // Upsert subscription by user_id
   const { data, error } = await supabase

@@ -29,11 +29,7 @@ export async function create(user) {
         throw err;
     }
     try {
-        await SubscriptionsService.create({
-            userId: newUser.id,
-            planId: 'free',
-            status: 'active',
-        });
+        await SubscriptionsService.syncFromRevenueCat(newUser.id);
     } catch (_) {
         // Intentionally ignore subscription creation failures to not block user creation
     }

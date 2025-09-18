@@ -26,3 +26,21 @@ export async function listPlans({ limit = 100, offset = 0 } = {}) {
   if (error) throw error;
   return data;
 }
+
+export async function createPlan({ id, name = id, priceCents = 0, interval = 'month' }) {
+  const payload = {
+    id,
+    name,
+    price_cents: priceCents,
+    interval,
+  };
+
+  const { data, error } = await supabase
+    .from(TABLE)
+    .insert([payload])
+    .select("*")
+    .single();
+
+  if (error) throw error;
+  return data;
+}

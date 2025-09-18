@@ -23,8 +23,10 @@ export const listSubscriptionsByUser = asyncHandler(async (req, res) => {
 });
 
 export const createSubscription = asyncHandler(async (req, res) => {
-    const subscription = await subscriptionsService.create(req.body);
-    res.json(subscription);
+    const { user_id } = req.body;
+    if (!user_id) return res.status(400).json({ error: 'user_id required' });
+    const sub = await subscriptionsService.syncFromRevenueCat(user_id);
+    res.json(sub);
 });
 
 export const updateSubscription = asyncHandler(async (req, res) => {
@@ -38,5 +40,3 @@ export const deleteSubscription = asyncHandler(async (req, res) => {
     const subscription = await subscriptionsService.remove(id);
     res.json(subscription);
 });
-
-

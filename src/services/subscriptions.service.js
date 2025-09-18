@@ -65,6 +65,7 @@ export async function syncFromRevenueCat(userId) {
     throw err;
   }
   const { subscriber } = await r.json();
+  console.log(subscriber);
 
   const ent = subscriber?.entitlements?.active?.pro;
   const productId = ent?.product_identifier ?? null;

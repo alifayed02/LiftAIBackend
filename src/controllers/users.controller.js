@@ -17,3 +17,9 @@ export const createUser = asyncHandler(async (req, res) => {
     const user = await usersService.create(req.body);
     res.json(user);
 });
+
+export const deleteUser = asyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const user = await usersService.remove(id);
+    res.json(user);
+});

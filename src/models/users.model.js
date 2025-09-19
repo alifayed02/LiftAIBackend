@@ -86,5 +86,3 @@ export async function deleteUser(id) {
   if (error) throw error;
   return data;
 }
-
-

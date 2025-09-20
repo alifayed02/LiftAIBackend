@@ -7,7 +7,10 @@ router.get('/id/:id', workoutsController.getWorkoutById);
 router.get('/user/:userId', workoutsController.listWorkoutsByUser);
 
 router.post('/create', workoutsController.createWorkout);
+router.post('/create-direct', workoutsController.createWorkoutDirect);
 router.patch('/:id', workoutsController.updateWorkout);
 router.delete('/:id', workoutsController.deleteWorkout);
+
+router.post('/analyze', workoutsController.analyzeWorkout);
 
 export default router;

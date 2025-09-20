@@ -28,7 +28,6 @@ export const createWorkout = asyncHandler(async (req, res) => {
         err.status = 400;
         throw err;
     }
-    // await usersService.assertCanCreateWorkout(userId);
 
     const width = metadata.width;
     const height = metadata.height;
@@ -54,5 +53,27 @@ export const updateWorkout = asyncHandler(async (req, res) => {
 export const deleteWorkout = asyncHandler(async (req, res) => {
     const id = req.params.id;
     const workout = await workoutsService.remove(id);
+    res.json(workout);
+});
+
+export const analyzeWorkout = asyncHandler(async (req, res) => {
+    const videoPath = req.body.videoPath;
+    if (!videoPath) {
+        const err = new Error('videoPath is required');
+        err.status = 400;
+        throw err;
+    }
+    const analysis = await gemini.geminiAnalysis(videoPath);
+    res.json(analysis);
+});
+
+export const createWorkoutDirect = asyncHandler(async (req, res) => {
+    const { userId, title, notes, videoUrl, recordedAt } = req.body;
+    if (!userId) {
+        const err = new Error('userId is required');
+        err.status = 400;
+        throw err;
+    }
+    const workout = await workoutsService.create({ userId, title, notes, videoUrl, recordedAt });
     res.json(workout);
 });

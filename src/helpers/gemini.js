@@ -84,7 +84,19 @@ export async function geminiAnalysis(videoPath) {
       });
 
     // Return the model’s text (or JSON.parse if you set responseMimeType)
-    return JSON.parse(result.text); // note: it's `text` (no parentheses)
+    console.log(result.text);
+    const parsed = JSON.parse(result.text);
+
+    // Delete the original raw video after successful analysis
+    const { error: delErr } = await supabase
+      .storage
+      .from("raw_workouts")
+      .remove([videoPath]);
+    if (delErr) {
+      console.warn(`Failed to delete raw_workouts/${videoPath}: ${delErr.message}`);
+    }
+
+    return parsed; // note: it's `text` (no parentheses)
   } finally {
     // 5) Clean up the temp file
     await fs.unlink(tmpPath).catch(() => {});

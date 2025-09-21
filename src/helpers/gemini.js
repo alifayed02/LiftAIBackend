@@ -18,8 +18,9 @@ export async function geminiAnalysis(videoPath) {
     
     1. Determine the exercise being done
     2. Analyze my form and technique for each repetition
-    2a. For each observation, note the timestamp and suggestions you recommend to improve the workout
+    2a. For each observation, note the timestamp and suggestions you recommend to improve the workout. The timestamp should line up with the video frame at the begining of the observation.
     2b. Keep suggestions short, concise, and straightforward yet detailed enough to help me improve my form and technique.
+    2c. Space suggestions out evenly so that they are not too close together.
     3. Output your response strictly in JSON in this format:
     {
       "exercise": "Incline Bench Press",

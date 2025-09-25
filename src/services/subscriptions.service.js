@@ -64,23 +64,34 @@ export async function syncFromRevenueCat(userId) {
     err.message = `RevenueCat ${r.status} error`;
     throw err;
   }
-  const { subscriber } = await r.json();
+  const body = await r.json();
+  const subscriber = body?.subscriber ?? body;
   console.log(subscriber);
 
-  const ent = subscriber?.entitlements?.active?.pro;
+  // Resolve entitlement container and choose 'pro' if present, else first available
+  const entContainer = subscriber?.entitlements?.active || subscriber?.entitlements || {};
+  const entKeys = Object.keys(entContainer || {});
+  const preferredKey = entKeys.includes('pro') ? 'pro' : entKeys[0];
+  const ent = preferredKey ? entContainer[preferredKey] : null;
+
   const productId = ent?.product_identifier ?? null;
-  const sub = productId ? subscriber?.subscriptions?.[productId] ?? {} : {};
+  const sub = productId ? (subscriber?.subscriptions?.[productId] ?? {}) : {};
 
   const now = new Date();
-  const expires = ent?.expires_date ? new Date(ent.expires_date) : null;
+  const expires = ent?.expires_date ? new Date(ent.expires_date) : (sub?.expires_date ? new Date(sub.expires_date) : null);
   const active = !!expires && expires > now;
-  const inTrial = (sub.period_type || ent?.period_type) === 'trial' && active;
-  const pastDue = !!sub.billing_issues_detected_at && active;
+
+  const periodType = sub?.period_type || ent?.period_type || null;
+  const inTrial = periodType === 'trial' && active;
+  const pastDue = !!sub?.billing_issues_detected_at && active;
 
   const status = inTrial ? 'trialing' : pastDue ? 'past_due' : active ? 'active' : 'canceled';
-  const current_period_start = sub.latest_purchase_date ? new Date(sub.latest_purchase_date) : null;
+  const current_period_start = sub?.purchase_date
+    ? new Date(sub.purchase_date)
+    : (sub?.original_purchase_date ? new Date(sub.original_purchase_date) : null);
   const current_period_end = expires;
-  const cancel_at_period_end = active && sub.will_renew === false;
+  const willRenewKnown = typeof sub?.will_renew === 'boolean';
+  const cancel_at_period_end = active && ((willRenewKnown && sub.will_renew === false) || (!!sub?.unsubscribe_detected_at));
 
   // Ensure plan exists (if any). If no productId, fallback to 'free'
   const planId = productId || 'free';
